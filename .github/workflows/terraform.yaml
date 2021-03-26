@@ -45,11 +45,13 @@ jobs:
         run: |
           TERRAFORM_API_HOST=https://app.terraform.io
 
-          plan=$(echo ${{ steps.plan.outputs.stdout }} | tee /dev/stderr )
-          echo $plan
+          # plan=$(echo ${{ steps.plan.outputs.stdout }} | tee /dev/stderr )
+          # echo $plan
 
-          plan_path=$(echo $plan | grep -Eo 'runs/run-[A-Za-z0-9]+')
-          echo $plan_path
+          # plan_path=$(echo $plan | grep -Eo 'runs/run-[A-Za-z0-9]+')
+          # echo $plan_path
+
+          plan_path = echo "${{ steps.plan.outputs.stdout }}" | grep -Eo 'runs/run-[A-Za-z0-9]+'
 
           plan_json_path=$(curl -H "Authorization: Bearer ${{ secrets.TF_API_TOKEN }}" $TERRAFORM_API_HOST/api/v2/${plan_path}/plan | jq -r '.data.links["json-output"]')
           echo $plan_json_path
