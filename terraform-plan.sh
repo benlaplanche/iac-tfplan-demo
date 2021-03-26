@@ -1,7 +1,7 @@
 #!/bin/bash
 TERRAFORM_API_HOST=https://app.terraform.io
 
-plan=$tf_plan_input
+plan=$TF_PLAN_INPUT
 echo $plan
 echo "----"
 

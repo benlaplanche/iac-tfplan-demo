@@ -41,6 +41,7 @@ jobs:
         run: sh ./terraform-plan.sh
         env:
           TERRAFORM_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+          TF_PLAN_INPUT: ${{ steps.plan.outputs.stdout }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
