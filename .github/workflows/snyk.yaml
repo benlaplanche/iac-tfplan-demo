@@ -52,7 +52,7 @@ jobs:
           echo "aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}" >> .aws/credentials
           echo "aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}" >> .aws/credentials
       - name: Terraform Format
-        uses: rewindio/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TF_VERSION }}
           tf_actions_subcommand: fmt
@@ -60,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Init
-        uses: rewindio/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TF_VERSION }}
           tf_actions_subcommand: init
@@ -71,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Validate
-        uses: rewindio/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TF_VERSION }}
           tf_actions_subcommand: validate
@@ -82,7 +82,7 @@ jobs:
 
       - name: Terraform Plan
         id: terraform-plan
-        uses: rewindio/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TF_VERSION }}
           tf_actions_subcommand: plan
