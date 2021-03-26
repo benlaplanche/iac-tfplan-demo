@@ -43,7 +43,8 @@ jobs:
           TERRAFORM_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
           TF_PLAN_INPUT: ${{ steps.plan.outputs.stdout }}
 
-      - uses: actions/github-script@0.9.0
+      - name: Add Plan output to PR
+        uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
@@ -66,17 +67,36 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
       - name: Run Snyk IaC
+        id: snyk
         continue-on-error: true
         uses: snyk/actions/iac@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test tf-plan.json --experimental
+      
+      - name: Add Snyk output to PR
+        uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          SNYK_OUTPUT: "${{ steps.snyk.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Snyk IaC Output \${process.env.SNYK_OUTPUT`
+              
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            }) 
       
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
