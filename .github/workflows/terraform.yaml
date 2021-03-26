@@ -31,8 +31,14 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color
+        run: terraform plan -no-color -out=tfplan.binary
         continue-on-error: true
+      
+      # - name: Upload Plan Artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: terraform-plan
+      #     path: tfplan.binary
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -44,9 +50,11 @@ jobs:
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
             <details><summary>Show Plan</summary>
             \`\`\`${process.env.PLAN}\`\`\`
             </details>
+
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
               
             github.issues.createComment({
@@ -58,6 +66,24 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+
+      - name: Create TF Plan JSON
+        id: plan-json
+        if: github.event_name == 'pull_request'
+        run: terraform show -json tfplan.binary > tf-plan.json
+      
+      - name: Run Snyk to check Kubernetes manifest file for issues
+        continue-on-error: true
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test tf-plan.json --experimental
+      
+      # - name: Download a single artifact
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: terraform-plan
 
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
