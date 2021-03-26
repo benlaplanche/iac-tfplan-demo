@@ -41,6 +41,7 @@ jobs:
         id: tfplan-json
         # with:
           # script: |
+        shell: bash
         run: |
           TERRAFORM_API_HOST=https://app.terraform.io
 
