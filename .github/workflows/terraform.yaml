@@ -45,7 +45,7 @@ jobs:
         run: |
           TERRAFORM_API_HOST=https://app.terraform.io
 
-          plan=$(echo ${{ steps.plan.outputs.stdout | tee /dev/stderr }})
+          plan=$(echo ${{ steps.plan.outputs.stdout }} | tee /dev/stderr )
           echo $plan
 
           plan_path=$(echo $plan | grep -Eo 'runs/run-[A-Za-z0-9]+')
