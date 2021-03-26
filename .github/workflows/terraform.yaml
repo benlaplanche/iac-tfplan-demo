@@ -92,7 +92,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Snyk IaC Output \`
+            const output = `#### Snyk IaC Output`
             \`\`\`${process.env.SNYK_OUTPUT}\`\`\`;
               
             github.issues.createComment({
