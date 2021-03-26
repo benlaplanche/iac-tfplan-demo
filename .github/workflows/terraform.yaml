@@ -43,7 +43,7 @@ jobs:
           # script: |
         run: |
           TERRAFORM_API_HOST=https://app.terraform.io
-          plan_path=$(echo ${process.env.PLAN} | grep -Eo 'runs/run-[A-Za-z0-9]+')
+          plan_path=$(echo ${{ steps.plan.outputs.stdout }} | grep -Eo 'runs/run-[A-Za-z0-9]+')
           plan_json_path=$(curl -H "Authorization: Bearer ${{ secrets.TF_API_TOKEN }}" $TERRAFORM_API_HOST/api/v2/${plan_path}/plan | jq -r '.data.links["json-output"]')
           curl -H "Authorization: Bearer ${{ secrets.TF_API_TOKEN}}" -H "Content-Type: application/vnd.api+json" -L $TERRAFORM_API_HOST$plan_json_path > tf-plan.json
 
@@ -81,12 +81,7 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Create TF Plan JSON
-        id: plan-json
-        if: github.event_name == 'pull_request'
-        run: terraform show -json tfplan.binary > tf-plan.json
-      
-      - name: Run Snyk to check Kubernetes manifest file for issues
+      - name: Run Snyk IaC
         continue-on-error: true
         uses: snyk/actions/iac@master
         env:
