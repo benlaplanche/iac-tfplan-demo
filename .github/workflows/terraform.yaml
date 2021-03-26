@@ -37,33 +37,10 @@ jobs:
       # You cannot save the tfplan output from the Hashicorp GitHub Action
       # So we can workaround this by parsing out the Run ID and then fetching it from Terraform Cloud
       - name: Get TF-Plan JSON
-        # uses: actions/github-script@0.9.0 
         id: tfplan-json
-        # with:
-          # script: |
-        shell: bash
-        run: |
-          TERRAFORM_API_HOST=https://app.terraform.io
-
-          # plan=$(echo ${{ steps.plan.outputs.stdout }} | tee /dev/stderr )
-          # echo $plan
-
-          # plan_path=$(echo $plan | grep -Eo 'runs/run-[A-Za-z0-9]+')
-          # echo $plan_path
-
-          plan_path = echo "${{ steps.plan.outputs.stdout }}" | grep -Eo 'runs/run-[A-Za-z0-9]+'
-
-          plan_json_path=$(curl -H "Authorization: Bearer ${{ secrets.TF_API_TOKEN }}" $TERRAFORM_API_HOST/api/v2/${plan_path}/plan | jq -r '.data.links["json-output"]')
-          echo $plan_json_path
-
-          curl -H "Authorization: Bearer ${{ secrets.TF_API_TOKEN}}" -H "Content-Type: application/vnd.api+json" -L $TERRAFORM_API_HOST$plan_json_path > tf-plan.json
-
-      
-      # - name: Upload Plan Artifact
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: terraform-plan
-      #     path: tfplan.binary
+        run: sh ./terraform-plan.sh
+        env:
+          TERRAFORM_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -100,11 +77,6 @@ jobs:
         with:
           command: test tf-plan.json --experimental
       
-      # - name: Download a single artifact
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: terraform-plan
-
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       #   run: terraform apply -auto-approve
