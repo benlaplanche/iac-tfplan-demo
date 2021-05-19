@@ -75,6 +75,14 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+      - name: Build Custom Rules
+        id: opa
+        uses: aserto-dev/opa-build-action@main
+        with:
+          source: .
+          target: custom.tar.gz
+          options: -t wasm -e "main/deny
+
       - name: Run Snyk IaC
         id: snyk
         continue-on-error: true
@@ -82,15 +90,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test tf-plan.json 
-      
-      - name: Build Custom Rules
-        id: opa
-        uses: aserto-dev/opa-build-action@main
+          command: test tf-plan.json --rules=custom.tar.gz
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
         with:
-          source: .
-          target: custom.tar.gz
-          options: -t wasm -e "main/deny"
+          sarif_file: snyk.sarif
       
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
