@@ -75,6 +75,14 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+      - name: Build Custom Rules
+        id: opa
+        uses: aserto-dev/opa-build-action@main
+        with:
+          source: .
+          target: ./custom.tar.gz
+          options: -t wasm -e "main/deny"
+
       - name: Run Snyk IaC
         id: snyk
         continue-on-error: true
@@ -82,7 +90,16 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test tf-plan.json --experimental
+          command: test tf-plan.json --scan=planned-values --rules=custom.tar.gz --sarif-file-output=snyk.sarif
+      
+      - name: PATCH Fix Sarif file output
+        id: patch-sarif
+        run: sed 's/-1/1/' snyk.sarif > fixed.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: fixed.sarif
       
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
