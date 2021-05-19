@@ -80,7 +80,7 @@ jobs:
         uses: aserto-dev/opa-build-action@main
         with:
           source: .
-          target: custom.tar.gz
+          target: ./custom.tar.gz
           options: -t wasm -e "main/deny"
 
       - name: Run Snyk IaC
