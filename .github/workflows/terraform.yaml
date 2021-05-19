@@ -94,12 +94,12 @@ jobs:
       
       - name: PATCH Fix Sarif file output
         id: patch-sarif
-        run: sed 's/-1/1/' snyk.sarif
+        run: sed 's/-1/1/' snyk.sarif > fixed.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: snyk.sarif
+          sarif_file: fixed.sarif
       
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
