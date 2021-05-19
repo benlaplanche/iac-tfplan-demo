@@ -10,7 +10,7 @@ deny[msg] {
 		"title": "Missing a tag for owning team",
 		"type": "custom",
 		"subType": "S3",
-		"severity": "low",
+		"severity": "critical",
 		"policyEngineType": "opa",
 		"issue": "There is no defined tag for the owning team",
 		"impact": "Deployment will be blocked until this is resolved.",
