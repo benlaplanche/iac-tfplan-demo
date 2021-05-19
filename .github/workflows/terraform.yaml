@@ -82,7 +82,15 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test tf-plan.json --experimental
+          command: test tf-plan.json 
+      
+      - name: Build Custom Rules
+        id: opa
+        uses: aserto-dev/opa-build-action@main
+        with:
+          source: custom.rego
+          target: custom.tar.gz
+          options: -t wasm -e "main/deny"
       
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
