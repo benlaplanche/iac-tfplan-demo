@@ -1,9 +1,9 @@
 name: "Terraform"
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   pull_request:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color 
+        run: terraform plan -no-color
         continue-on-error: true
 
       # You cannot save the tfplan output from the Hashicorp GitHub Action
@@ -55,15 +55,15 @@ jobs:
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-      
+
             <details><summary>Show Plan</summary>
-      
+
             \`\`\`${process.env.PLAN}\`\`\`
-      
+
             </details>
-      
+
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-         
+
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -91,16 +91,15 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test tf-plan.json --scan=planned-values --rules=custom.tar.gz --sarif-file-output=snyk.sarif
-      
-      - name: PATCH Fix Sarif file output
-        id: patch-sarif
-        run: sed 's/-1/1/' snyk.sarif > fixed.sarif
+
+      # - name: PATCH Fix Sarif file output
+      #   id: patch-sarif
+      #   run: sed 's/-1/1/' snyk.sarif > fixed.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: fixed.sarif
-      
+          sarif_file: snyk.sarif
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       #   run: terraform apply -auto-approve
